@@ -14,6 +14,7 @@ export const signIn = async (req, res) => {
     // add more checks for validation of email and password
     if (!email || !password) {
       return res.status(400).json({
+        success: false,
         message: "Email and password are required",
       });
     }
@@ -21,7 +22,8 @@ export const signIn = async (req, res) => {
     // find the user
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return res.status(401).json({
+      return res.json({
+        success: false,
         message: "User doesn't exists.",
       });
     }
@@ -30,7 +32,8 @@ export const signIn = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({
+      return res.json({
+        success: false,
         message: "Invalid credentials",
       });
     }
@@ -47,8 +50,10 @@ export const signIn = async (req, res) => {
     });
 
     return res.json({
+      success: true,
       message: "Login successful",
       token,
+      name: payload.name,
     });
   } catch (error) {
     console.error(`Error in signing in user ${error.message}`);
@@ -65,7 +70,8 @@ export const signUp = async (req, res) => {
 
     // Input validation
     if (!name || !email || !password) {
-      return res.status(400).json({
+      return res.json({
+        success: false,
         message: "Name, email, password is required",
       });
     }
@@ -73,7 +79,8 @@ export const signUp = async (req, res) => {
     // check if the user already exists in our database
     const user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({
+      return res.json({
+        success: false,
         message: "Email already exists",
       });
     }
@@ -97,6 +104,7 @@ export const signUp = async (req, res) => {
     };
 
     return res.status(201).json({
+      success: true,
       message: "User signed up successfully",
       user: updatedUser,
     });

@@ -3,17 +3,25 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Copy, ErrorIcon, LoadingIcon, WriteIcon } from "../components/Icons";
-import { rewriteContent } from "../services/content.service";
 import { toast } from "react-toastify";
+import { Navigate, useParams } from "react-router-dom";
+import { PAGES } from "../constant";
 
 const schema = z.object({
   content: z.string().min(1, "Content is required"),
 });
 
-export default function Rewrite() {
-  const [rewrittenContent, setRewrittenContent] = useState(null);
+export default function GenerateContent() {
+  const [generatedContent, setGeneratedContent] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const { action } = useParams();
+  const pageContent = PAGES[action];
+
+  if (!pageContent) {
+    return <Navigate to="/" replace />;
+  }
+
   const {
     register,
     handleSubmit,
@@ -24,9 +32,9 @@ export default function Rewrite() {
   });
 
   const handleCopy = async () => {
-    if (!rewrittenContent) return;
+    if (!generatedContent) return;
     try {
-      await window.navigator.clipboard.writeText(rewrittenContent);
+      await window.navigator.clipboard.writeText(generatedContent);
       toast.success("Content copied");
     } catch (error) {
       console.log(`Failed to copy. Error is ${error}`);
@@ -37,27 +45,27 @@ export default function Rewrite() {
     console.log(data);
     setIsSubmitting(true);
     setError(null);
-    setRewrittenContent(null);
+    setGeneratedContent(null);
 
     try {
-      const res = await rewriteContent(data);
-      setRewrittenContent(res?.data?.content);
+      const res = await pageContent.handler(data);
+      setGeneratedContent(res?.data?.content);
     } catch (error) {
-      console.log("Error in rewriting content: ".error);
-      setError("Failed to rewrite content. Please try again");
+      console.log("Error in generating content: ".error);
+      setError("Failed to generate content. Please try again");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
-            Rewrite content
+            {pageContent.header}
           </h1>
-          <p className="text-gray-600 text-lg">Rewrite your content with AI</p>
+          <p className="text-gray-600 text-lg">{pageContent["sub-header"]}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -74,7 +82,7 @@ export default function Rewrite() {
                   <textarea
                     id="content"
                     {...register("content")}
-                    placeholder="Enter the content you want to rewrite..."
+                    placeholder={pageContent["input-placeholder"]}
                     rows={6}
                     className={`w-full px-4 py-3 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-0 resize-none ${
                       errors?.content
@@ -102,17 +110,17 @@ export default function Rewrite() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
                     <LoadingIcon style="animate-spin h-5 w-5" />
-                    <span>Rewriting...</span>
+                    <span>{pageContent["loading-text"]}</span>
                   </>
                 ) : (
                   <>
                     <WriteIcon style="w-5 h-5" />
-                    <span>Rewrite content</span>
+                    <span>{pageContent["button-content"]}</span>
                   </>
                 )}
               </button>
@@ -121,12 +129,12 @@ export default function Rewrite() {
 
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Rewritten content
+              {pageContent["output-header"]}
             </h2>
-            {rewrittenContent ? (
+            {generatedContent ? (
               <div className="space-y-4">
-                <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 p-4 min-h-[200px]">
-                  <p className="text-gray-600"> {rewrittenContent}</p>
+                <div className="relative rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 p-4 min-h-50">
+                  <p className="text-gray-600"> {generatedContent}</p>
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -138,23 +146,23 @@ export default function Rewrite() {
                   </button>
                   <button
                     onClick={() => {
-                      setRewrittenContent(null);
+                      setGeneratedContent(null);
                       reset();
                     }}
                     className="flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg font-semibold text-sm hover:bg-gray-300 transition-colors"
                   >
-                    Rewrite New
+                    {pageContent["redo-instruction"]}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-gray-400">
+              <div className="flex flex-col items-center justify-center h-full min-h-100 text-gray-400">
                 <WriteIcon style="w-24 h-24 mb-4 opacity-50" />
                 <p className="text-lg font-medium">
-                  Your rewritten content will appear here
+                  {pageContent["output-subheader"]}
                 </p>
                 <p className="text-sm mt-2">
-                  Fill out the form and click rewrite to generate new content
+                  {pageContent["output-form-action"]}
                 </p>
               </div>
             )}

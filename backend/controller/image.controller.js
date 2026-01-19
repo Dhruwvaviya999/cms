@@ -93,3 +93,6 @@ async function uploadImage(buffer) {
       .end(buffer);
   });
 }
+
+export const history = async (req, res) => {
+};

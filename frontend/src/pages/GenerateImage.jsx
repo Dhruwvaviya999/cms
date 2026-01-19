@@ -3,7 +3,7 @@ import { IMAGE_RESOLUTION } from "../constant";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { generateImage } from "../services/image";
+import { generateImage } from "../services/image.service.js";
 import {
   Download,
   DropDown,
@@ -49,7 +49,7 @@ export default function GenerateImage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
@@ -136,7 +136,7 @@ export default function GenerateImage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-lg font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -191,7 +191,7 @@ export default function GenerateImage() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-gray-400">
+              <div className="flex flex-col items-center justify-center h-full min-h-100 text-gray-400">
                 <ImageIcon style="w-24 h-24 mb-4 opacity-50" />
                 <p className="text-lg font-medium">
                   Generated image will appear here

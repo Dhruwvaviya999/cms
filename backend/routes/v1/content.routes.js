@@ -1,8 +1,10 @@
 import express from "express";
-import { rewrite } from "../../controller/content.controller.js";
+import { generateContent, history } from "../../controller/content.controller.js";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
 const contentRouter = express.Router();
 
-contentRouter.post("/rewrite", authMiddleware, rewrite);
+contentRouter.post("/:action", authMiddleware, generateContent);
+
+contentRouter.get("/history", authMiddleware, history);
 
 export default contentRouter;

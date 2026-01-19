@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { imageHistory } from "../services/image";
+import { imageHistory } from "../services/image.service";
 import {
   Download,
   ErrorIcon,
@@ -31,7 +31,7 @@ export default function ImageHistory() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">

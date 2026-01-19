@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { CrossedEyeIcon, EyeIcon, LoadingIcon } from "../components/Icons";
 import { toast } from "react-toastify";
-import { signIn } from "../services/auth";
+import { signIn } from "../services/auth.service";
+import { useAuth } from "../context/AuthContext";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -23,8 +24,10 @@ const schema = z.object({
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -34,16 +37,30 @@ export default function Login() {
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const submitHandler = async (data) => {
-    console.log(data);
     setIsSubmitting(true);
     try {
       const res = await signIn(data);
+      console.log(res)
+      if(res?.data?.success === false){
+        toast.error(res?.data?.message || "Log in failed. Please try again");
+        return;
+      }
+
       const token = res?.data?.token;
-      localStorage.setItem("token", token);
-      //   TODO: add navigation logic
-      //   reset();
-      //   navigate("/");
+      const name = res?.data?.name;
+      if (token) {
+        login(token, name);
+        toast.success("Logged in successfully");
+        reset();
+        navigate("/");
+      }
     } catch (error) {
       console.log(`Error in logging in: ${error}`);
       toast.error("Log in failed. Please try again");
@@ -53,7 +70,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-xl shadow-xl p-8 md:p-12 border border-gray-100">
           <div className="text-center mb-8">

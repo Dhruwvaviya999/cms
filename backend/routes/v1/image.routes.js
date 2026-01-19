@@ -5,4 +5,4 @@ const imageRouter = express.Router();
 
 imageRouter.post("/generate", authMiddleware, generateImage);
 
-export default imageRouter;;
+export default imageRouter;

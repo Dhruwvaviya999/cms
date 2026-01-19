@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signUp } from "../services/auth";
+import { signUp } from "../services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
 import { CrossedEyeIcon, EyeIcon, LoadingIcon } from "../components/Icons";
 import { toast } from "react-toastify";
@@ -36,13 +36,17 @@ export default function SignUp() {
   });
 
   const submitHandler = async (data) => {
-    console.log(data);
     setIsSubmitting(true);
     try {
-      await signUp(data);
-      toast.success("Account created successfully. Please login!");
-      reset();
-      navigate("/login");
+      const res = await signUp(data);
+      if(res?.data?.success){
+        toast.success("Account created successfully. Please login!");
+        reset();
+        navigate("/login");
+        return;
+      }
+
+      toast.error(res?.data?.message || "Sign up failed. Please try again");
     } catch (error) {
       console.log(`Error in signing in user: ${error}`);
       toast.error("Sign up failed. Please try again");
@@ -52,7 +56,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-indigo-50 via-white to-purple-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-xl shadow-xl p-8 md:p-12 border border-gray-100">
           <div className="text-center mb-8">
