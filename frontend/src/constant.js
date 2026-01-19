@@ -1,10 +1,9 @@
 import {
   expandContent,
   generateArticle,
-  generateSeoContent,
   rewriteContent,
   shortenContent,
-} from "./services/content";
+} from "./services/content.service";
 
 export const IMAGE_RESOLUTION = [
   { value: "512x512", label: "512 x 512 (Square)" },
@@ -78,19 +77,5 @@ export const PAGES = {
     "output-form-action":
       "Fill out the form and click generate to create new articles",
     handler: generateArticle,
-  },
-  "seo-content": {
-    header: "SEO content generator",
-    "sub-header":
-      "Automatically generate SEO title, keyword, and meta description",
-    "input-placeholder": "Paste your article content here...",
-    "loading-text": "Generating SEO content...",
-    "button-content": "Generate SEO content",
-    "output-header": "SEO content",
-    "redo-instruction": "Generate New",
-    "output-subheader": "Your SEO content will appear here",
-    "output-form-action":
-      "Fill out the form and click generate to generate SEO content",
-    handler: generateSeoContent,
   },
 };
