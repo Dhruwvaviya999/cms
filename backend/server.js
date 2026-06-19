@@ -1,36 +1,48 @@
 import express from "express";
 import cors from "cors";
-import connectDB from "./db.js";
+import dotenv from "dotenv"; // Fixed: Standard default import
 import router from "./routes/v1/index.routes.js";
-import { configDotenv } from "dotenv";
 import { connectRedis } from "./config/redis.js";
-configDotenv();
-const app = express();
+import connectDB from "./config/database.js";
+import logger from "./services/logger.service.js";
+import { configureCloudinary } from "./config/cloudinary.js";
+import { validateEnvVariables } from "./config/env.js";
+import { sendError } from "./services/response.service.js";
+import { HTTP_STATUS } from "./constant.js";
+import { errorHandler } from "./middleware/error.middleware.js";
+import { globalLimiter } from "./middleware/ratelimitter.middleware.js";
 
+// Initialize environment variables first thing
+dotenv.config();
+
+const app = express();
 const PORT = process.env.PORT || 8000;
 
+// Validate environment variables safely
 try {
   validateEnvVariables();
 } catch (error) {
-  logger.error(error.message);
+  logger.error(`Env Validation Error: ${error.message}`);
 }
 
+// Establish asynchronous database connections
 connectDB().catch((error) => {
-  logger.error(`Failed to connect to the connectDB: ${error.message}`);
+  logger.error(`Failed to connect to connectDB: ${error.message}`);
 });
 
-connectRedis().catch((error) => {
-  logger.error(`Failed to connect to the redis: ${error.message}`);
-});
+// connectRedis().catch((error) => {
+//   logger.error(`Failed to connect to redis: ${error.message}`);
+// });
 
+// Configure third-party integrations
 configureCloudinary();
 
+// Middleware stack
 app.use(cors());
-// parse json
 app.use(express.json());
+app.use(globalLimiter); // Protect your CMS API endpoints
 
-app.use(globalLimiter);
-
+// Core Routes
 app.use("/v1", router);
 
 app.get("/", (req, res) => {
@@ -42,13 +54,12 @@ app.get("/", (req, res) => {
   });
 });
 
-
-// 404 handler - should be after all routes
+// 404 handler - placed after all valid routes
 app.use((req, res) => {
   return sendError(res, HTTP_STATUS.NOT_FOUND, "Route not found");
 });
 
-// Error handling middleware
+// Global Error handling middleware - must be last
 app.use(errorHandler);
 
 app.listen(PORT, () => {

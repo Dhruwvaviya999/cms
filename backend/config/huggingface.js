@@ -1,5 +1,5 @@
-const { InferenceClient } = require("@huggingface/inference");
+import { InferenceClient } from "@huggingface/inference";
 
 const client = new InferenceClient(process.env.HUGGING_FACE_API_KEY);
 
-module.exports = client;
+export default client;

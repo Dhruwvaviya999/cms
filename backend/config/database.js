@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { configDotenv } from "dotenv";
+import logger from "../services/logger.service.js";
 configDotenv();
 
 async function connectDB() {

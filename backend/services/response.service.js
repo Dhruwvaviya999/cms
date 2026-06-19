@@ -28,8 +28,4 @@ const asyncHandler = (fn) => {
   };
 };
 
-export {
-  sendError,
-  sendSuccess,
-  asyncHandler,
-};
+export { sendError, sendSuccess, asyncHandler };

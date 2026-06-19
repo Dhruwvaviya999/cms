@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { configDotenv } from "dotenv";
+import logger from "../services/logger.service.js";
 configDotenv();
 
 export const signIn = async (req, res) => {

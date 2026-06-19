@@ -87,7 +87,7 @@ const HTTP_STATUS = {
 
 const JWT_EXPIRATION = "7d";
 
-module.exports = {
+export {
   RESOLUTION_MAP,
   ACTIONS,
   CONTENT_ACTIONS,
