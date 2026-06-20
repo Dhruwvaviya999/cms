@@ -1,4 +1,4 @@
-import ai from "../config/gemini";
+import ai from "../config/gemini.js";
 
 async function generateContentWithGemini(prompt) {
   const response = await ai.models.generateContent({
