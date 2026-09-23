@@ -49,10 +49,10 @@ app.use(cors());
 app.use(express.json());
 app.use(globalLimiter); // Protect your CMS API endpoints
 
-// Core Routes
-app.use("/v1", router);
+// Core Routes (/api prefix: Vercel routes /api/* to this service with the full path)
+app.use(["/v1", "/api/v1"], router);
 
-app.get("/", (req, res) => {
+app.get(["/", "/api"], (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Generator CMS API",

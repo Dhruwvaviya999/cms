@@ -11,15 +11,7 @@
         "backend": {
             "root": "backend/",
             "framework": "express",
-            "entrypoint": "server.js",
-            "routes": [
-                {
-                    "src": "/api/(.*)",
-                    "transforms": [
-                        { "type": "request.path", "op": "set", "args": "/$1" }
-                    ]
-                }
-            ]
+            "entrypoint": "server.js"
         }
     },
     "rewrites": [
