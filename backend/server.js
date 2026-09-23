@@ -49,8 +49,14 @@ app.use(cors());
 app.use(express.json());
 app.use(globalLimiter); // Protect your CMS API endpoints
 
+// Ensure MongoDB is connected before any API route runs (retries if startup connect failed)
+const ensureDB = async (req, res, next) => {
+  await connectDB();
+  next();
+};
+
 // Core Routes (/api prefix: Vercel routes /api/* to this service with the full path)
-app.use(["/v1", "/api/v1"], router);
+app.use(["/v1", "/api/v1"], ensureDB, router);
 
 app.get(["/", "/api"], (req, res) => {
   res.status(200).json({
