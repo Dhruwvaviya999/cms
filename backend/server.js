@@ -30,9 +30,13 @@ connectDB().catch((error) => {
   logger.error(`Failed to connect to connectDB: ${error.message}`);
 });
 
-// connectRedis().catch((error) => {
-//   logger.error(`Failed to connect to redis: ${error.message}`);
-// });
+if (process.env.REDIS_HOST) {
+  connectRedis().catch((error) => {
+    logger.error(`Failed to connect to redis: ${error.message}`);
+  });
+} else {
+  logger.warn("REDIS_HOST not set, image caching disabled");
+}
 
 // Configure third-party integrations
 configureCloudinary();

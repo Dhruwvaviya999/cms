@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { contentWithId } from "../services/content";
-import { Copy, ErrorIcon, LoadingIcon } from "../component/Icons";
+import { contentWithId } from "../services/content.service";
+import { Copy, ErrorIcon, LoadingIcon } from "../components/Icons";
 import moment from "moment";
 import { capitalizeWord, getColorType, handleCopy } from "../utils/global";
 

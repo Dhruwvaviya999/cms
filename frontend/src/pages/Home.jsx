@@ -47,7 +47,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="max-w-6xl mt-10 mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-8 md:p-10">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
             What is Generator CMS?

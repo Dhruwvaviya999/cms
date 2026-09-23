@@ -1,7 +1,11 @@
+import mongoose from "mongoose";
 import { redisClient } from "../config/redis.js";
 import { HTTP_STATUS, RESOLUTION_MAP } from "../constant.js";
+import Image from "../models/image.model.js";
 import logger from "../services/logger.service.js";
-import { asyncHandler, sendSuccess } from "../services/response.service.js";
+import { asyncHandler, sendError, sendSuccess } from "../services/response.service.js";
+import { generateImageBlob } from "../services/image/generateImage.service.js";
+import { uploadImage } from "../services/image/upload.service.js";
 
 
 export const generateImage = asyncHandler(async (req, res) => {
@@ -17,7 +21,10 @@ export const generateImage = asyncHandler(async (req, res) => {
 
   logger.info(`Prompt: ${prompt} and Resolution: ${resolution}`);
 
-  const cachedUrl = await redisClient.get(cacheKey);
+  // Redis is optional; skip cache when it is not connected
+  const cachedUrl = redisClient.isReady
+    ? await redisClient.get(cacheKey)
+    : null;
 
   if (cachedUrl) {
     logger.info("Data is fetched from the cache");
@@ -36,7 +43,9 @@ export const generateImage = asyncHandler(async (req, res) => {
 
   const uploadedImage = await uploadImage(buffer);
 
-  await redisClient.set(cacheKey, uploadedImage?.url);
+  if (redisClient.isReady) {
+    await redisClient.set(cacheKey, uploadedImage?.url);
+  }
 
   await Image.create({
     prompt,

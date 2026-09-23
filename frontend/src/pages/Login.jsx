@@ -18,7 +18,7 @@ const schema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(
       /[^A-Za-z0-9]/,
-      "Password must contain at least one special character"
+      "Password must contain at least one special character",
     ),
 });
 
@@ -43,18 +43,18 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate]);
 
-  const submitHandler = async (data) => {
+  const submitHandler = async (payload) => {
     setIsSubmitting(true);
     try {
-      const res = await signIn(data);
-      console.log(res)
-      if(res?.data?.success === false){
-        toast.error(res?.data?.message || "Log in failed. Please try again");
+      const { data } = await signIn(payload);
+      console.log("data",data)
+      if (data?.data?.success === false) {
+        toast.error(data?.message || "Log in failed. Please try again");
         return;
       }
 
-      const token = res?.data?.token;
-      const name = res?.data?.name;
+      const token = data?.data?.token;
+      const name = data?.data?.name;
       if (token) {
         login(token, name);
         toast.success("Logged in successfully");

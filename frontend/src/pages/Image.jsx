@@ -1,5 +1,5 @@
-import Card from "../component/Card";
-import { ImageIcon, ListIcon } from "../component/Icons";
+import Card from "../components/Card";
+import { ImageIcon, ListIcon } from "../components/Icons";
 
 const imageFeature = [
   {
