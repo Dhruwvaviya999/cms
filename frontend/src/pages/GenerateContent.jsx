@@ -49,7 +49,7 @@ export default function GenerateContent() {
 
     try {
       const res = await pageContent.handler(data);
-      setGeneratedContent(res?.data?.content);
+      setGeneratedContent(res?.data?.data?.content);
     } catch (error) {
       console.log("Error in generating content: ".error);
       setError("Failed to generate content. Please try again");

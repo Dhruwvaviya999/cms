@@ -25,7 +25,7 @@ export default function ContentHistory() {
       setIsLoading(true);
       setError(null);
       const { data: res } = await contentHistory();
-      setContentItems(res?.data?.content);
+      setContentItems(res?.data?.data?.content);
       setIsSearchMode(false);
     } catch (error) {
       console.error("Error in fetching content history", error);
@@ -44,7 +44,7 @@ export default function ContentHistory() {
       setIsSearching(true);
       setError(null);
       const { data: res } = await searchContent(searchQuery.trim());
-      setContentItems(res?.data?.content || []);
+      setContentItems(res?.data?.data?.content || []);
       setIsSearchMode(true);
     } catch (error) {
       console.error("Error in searching content", error);

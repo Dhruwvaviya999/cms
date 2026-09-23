@@ -41,7 +41,7 @@ export default function Rewrite() {
 
     try {
       const res = await rewriteContent(data);
-      setRewrittenContent(res?.data?.content);
+      setRewrittenContent(res?.data?.data?.content);
     } catch (error) {
       console.log("Error in rewriting content: ".error);
       setError("Failed to rewrite content. Please try again");

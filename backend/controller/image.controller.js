@@ -44,17 +44,17 @@ export const generateImage = asyncHandler(async (req, res) => {
   const uploadedImage = await uploadImage(buffer);
 
   if (redisClient.isReady) {
-    await redisClient.set(cacheKey, uploadedImage?.url);
+    await redisClient.set(cacheKey, uploadedImage?.secure_url);
   }
 
   await Image.create({
     prompt,
-    image_url: uploadedImage?.url,
+    image_url: uploadedImage?.secure_url,
     user_id: req.user.id,
   });
 
   return sendSuccess(res, HTTP_STATUS.OK, "Image generated successfully", {
-    image: uploadedImage?.url,
+    image: uploadedImage?.secure_url,
   });
 });
 

@@ -22,7 +22,7 @@ export default function ContentDetails() {
       setError(null);
 
       const { data: res } = await contentWithId(id);
-      setContent(res?.data?.content);
+      setContent(res?.data?.data?.content);
     } catch (error) {
       console.log("Error in fetching content details: ", error);
       setError("Failed to load content. Please try again");
