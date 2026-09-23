@@ -1,98 +1,79 @@
-import { configDotenv } from "dotenv";
-configDotenv();
-import fs from "fs";
-import { v2 as cloudinary } from "cloudinary";
-import { InferenceClient } from "@huggingface/inference";
-import { RESOLUTION_MAP } from "../constant.js";
-import Image from "../models/image.model.js";
+import { redisClient } from "../config/redis.js";
+import { HTTP_STATUS, RESOLUTION_MAP } from "../constant.js";
+import logger from "../services/logger.service.js";
+import { asyncHandler, sendSuccess } from "../services/response.service.js";
 
-const client = new InferenceClient(process.env.HUGGING_FACE_API_KEY);
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+export const generateImage = asyncHandler(async (req, res) => {
+  logger.info(
+    `Started processing of image generation request for user id ${req.user.id}`,
+  );
+  const { prompt, resolution } = req.body;
+  const cacheKey = `${resolution}:${prompt}`;
 
-export const generateImage = async (req, res) => {
-  try {
-    console.log(`Started processing of image generation request`);
-    const { prompt, resolution } = req.body;
-    console.log(
-      `Started processing of image generation request for user id ${req.user.id}`
-    );
+  if (!prompt) {
+    return sendError(res, HTTP_STATUS.BAD_REQUEST, "Prompt is required");
+  }
 
-    if (!process.env.HUGGING_FACE_API_KEY) {
-      console.log("Hugging Face API key not configured");
-      return res.status(500).json({
-        message: "Interval server error",
-      });
-    }
+  logger.info(`Prompt: ${prompt} and Resolution: ${resolution}`);
 
-    if (!prompt) {
-      return res.status(400).json({
-        message: "Prompt is required",
-      });
-    }
+  const cachedUrl = await redisClient.get(cacheKey);
 
-    console.log(`Prompt: ${prompt} and Resolution: ${resolution}`);
-
-    const dimension = RESOLUTION_MAP[resolution] || RESOLUTION_MAP["1024x1024"];
-
-    const image = await generateImageBlob(prompt, dimension);
-
-    const buffer = Buffer.from(await image.arrayBuffer());
-
-    fs.writeFileSync("output.png", buffer);
-
-    const uploadedImage = await uploadImage(buffer);
-
-    await Image.create({
-      prompt,
-      image_url: uploadedImage?.url,
-      user_id: req.user.id,
-    });
-
-    return res.json({
-      message: "Image generated successfully",
-      image: uploadedImage?.url,
-    });
-  } catch (error) {
-    console.error(`Error in generating image. Error is ${error.message}`);
-    return res.status(500).json({
-      message: "Internal server error",
+  if (cachedUrl) {
+    logger.info("Data is fetched from the cache");
+    return sendSuccess(res, HTTP_STATUS.OK, "Image generated successfully", {
+      image: cachedUrl,
     });
   }
-};
 
-async function generateImageBlob(prompt, dimension) {
-  return await client.textToImage({
-    provider: "auto",
-    model: "black-forest-labs/FLUX.1-schnell",
-    inputs: prompt,
-    parameters: {
-      num_inference_steps: 5,
-      width: dimension.width,
-      height: dimension.height,
+  const dimension = RESOLUTION_MAP[resolution] || RESOLUTION_MAP["1024x1024"];
+
+  const image = await generateImageBlob(prompt, dimension);
+
+  const buffer = Buffer.from(await image.arrayBuffer());
+
+  // fs.writeFileSync("output.png", buffer);
+
+  const uploadedImage = await uploadImage(buffer);
+
+  await redisClient.set(cacheKey, uploadedImage?.url);
+
+  await Image.create({
+    prompt,
+    image_url: uploadedImage?.url,
+    user_id: req.user.id,
+  });
+
+  return sendSuccess(res, HTTP_STATUS.OK, "Image generated successfully", {
+    image: uploadedImage?.url,
+  });
+});
+
+export const history = asyncHandler(async (req, res) => {
+  logger.info(
+    `Started processing image history request for user ${req.user.id}`,
+  );
+  const id = req.user.id;
+  const images = await Image.aggregate([
+    {
+      $match: { user_id: new mongoose.Types.ObjectId(id) },
     },
-  });
-}
+    {
+      $project: {
+        _id: 1,
+        url: "$image_url",
+        createdAt: 1,
+        prompt: 1,
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
 
-async function uploadImage(buffer) {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        { resource_type: "image", folder: "generated-ai-image" },
-        (error, uploadResult) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve(uploadResult);
-        }
-      )
-      .end(buffer);
+  return sendSuccess(res, HTTP_STATUS.OK, "Image fetched successfully", {
+    images,
   });
-}
-
-export const history = async (req, res) => {
-};
+});

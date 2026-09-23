@@ -8,6 +8,6 @@ export const errorHandler = (err, req, res, next) => {
   return sendError(
     res,
     err.statusCode || HTTP_STATUS.INTERVAL_SERVER_ERROR,
-    err.message || "Internal Server Error"
+    err.message || "Internal Server Error",
   );
 };
