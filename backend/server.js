@@ -41,6 +41,9 @@ if (process.env.REDIS_HOST) {
 // Configure third-party integrations
 configureCloudinary();
 
+// Behind Vercel's proxy: use X-Forwarded-For so rate limiting is per client, not per proxy
+app.set("trust proxy", 1);
+
 // Middleware stack
 app.use(cors());
 app.use(express.json());

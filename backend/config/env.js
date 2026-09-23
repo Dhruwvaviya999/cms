@@ -1,6 +1,5 @@
 export const validateEnvVariables = () => {
   const required = [
-    "PORT",
     "MONGO_URL",
     "SECRET_KEY",
     "HUGGING_FACE_API_KEY",
